@@ -5,7 +5,7 @@
 
 (defn source-accounts [source accounts]
   "Add a source key to each account map"
-  (map #(assoc % :source source)))
+  (map #(assoc % :source source) accounts))
 
 (defn corrupt?
   "Assumes the shared columns are email and name"
@@ -30,13 +30,16 @@
                              [:id])]
     (reduce
      (fn [acc one-or-two-accounts]
-       (let [status (determine-status one-or-two-accounts)]
+       (let [status (determine-status one-or-two-accounts)
+             report-entry (if (= 1 (count one-or-two-accounts))
+                            (first one-or-two-accounts)
+                            ;; include old and new rows in report
+                            one-or-two-accounts)]
          (if (= status :ok)
            acc
-           (update acc status conj one-or-two-accounts))))
+           (update acc status conj report-entry))))
      {}
      (vals by-id-index))))
-
 
 (defn -main
   "I don't do a whole lot ... yet."
