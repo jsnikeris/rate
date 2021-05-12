@@ -1,26 +1,15 @@
 # rate
 
-FIXME: description
-
-## Installation
-
-Download from http://example.com/FIXME.
+Connects to two databases running locally and writes a report to standard out of the added, removed, and corrupted rows.
 
 ## Usage
 
-FIXME: explanation
+First, start the databases:
 
-    $ java -jar rate-0.1.0-standalone.jar [args]
+    $ docker run -p 5432:5432 guaranteedrate/homework-pre-migration:1607545060-a7085621
+    $ docker run -p 5433:5432 guaranteedrate/homework-post-migration:1607545060-a7085621
 
-## Options
+Then, generate the report:
 
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
+    $ lein run > report.clj
 

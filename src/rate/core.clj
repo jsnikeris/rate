@@ -1,6 +1,7 @@
 (ns rate.core
   (:require [rate.db :as db]
-            [clojure.set :as s])
+            [clojure.set :as s]
+            [clojure.pprint :as pprint])
   (:gen-class))
 
 (defn source-accounts [source accounts]
@@ -25,6 +26,8 @@
       :ok)))
 
 (defn build-report-map [old-accounts new-accounts]
+  ;; values of this index are sets of one or two accounts
+  ;; one entry in the set means that account was added or removed
   (let [by-id-index (s/index (concat (source-accounts :old old-accounts)
                                      (source-accounts :new new-accounts))
                              [:id])]
@@ -32,8 +35,9 @@
      (fn [acc one-or-two-accounts]
        (let [status (determine-status one-or-two-accounts)
              report-entry (if (= 1 (count one-or-two-accounts))
-                            (first one-or-two-accounts)
-                            ;; include old and new rows in report
+                            ;; clean up added/missing entries
+                            (-> one-or-two-accounts first (dissoc :source))
+                            ;; include old and new versions when corrupt
                             one-or-two-accounts)]
          (if (= status :ok)
            acc
@@ -42,6 +46,9 @@
      (vals by-id-index))))
 
 (defn -main
-  "I don't do a whole lot ... yet."
+  "Writes a report to standard out"
   [& args]
-  (println "Hello, World!"))
+  (pprint/pprint (build-report-map (db/read-old-accounts)
+                                   (db/read-new-accounts))))
+
+
